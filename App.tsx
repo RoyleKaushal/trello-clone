@@ -3,6 +3,8 @@ import { SafeAreaView, StyleSheet, Text, Button, View } from 'react-native';
 // import Board from './components/Board';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Board from './src/components/Board';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import AddListModal from './src/components/AddListModal';
 
 type listProps = {
   id: string;
@@ -12,6 +14,7 @@ type listProps = {
 
 export default function App() {
   const [lists, setLists] = useState<listProps[]>([]);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   const resetBoard = async () => {
     await AsyncStorage.removeItem('trelloBoard');
@@ -29,13 +32,28 @@ export default function App() {
   }, [lists]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Trello Clone</Text>
-        <Button title="Reset Board" onPress={resetBoard} />
-      </View>
-      <Board lists={lists} setLists={setLists} />
-    </SafeAreaView>
+    <GestureHandlerRootView style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Trello Clone</Text>
+          <Button title="Reset Board" onPress={resetBoard} />
+          {lists.length !== 0 && (
+            <Button
+              title="Add List"
+              onPress={() =>
+                setModalVisible(true)
+              }
+            />
+          )}
+        </View>
+        <Board lists={lists} setLists={setLists} />
+        <AddListModal
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          setLists={setLists}
+        />
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 

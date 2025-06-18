@@ -8,6 +8,8 @@ import {
   TextInput,
 } from 'react-native';
 import Button from './Button';
+import DatePicker from 'react-native-date-picker';
+import moment from 'moment';
 
 export default function Card({
   card,
@@ -15,17 +17,20 @@ export default function Card({
   cardIndex,
   lists,
   setLists,
+  drag,
+  isActive,
 }: {
   card: any;
   listIndex: number;
   cardIndex: number;
   lists: any[];
   setLists: (lists: any[]) => void;
+  drag?: () => void;
+  isActive?: boolean;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [editTitle, setEditTitle] = useState(card.title);
   const [editDesc, setEditDesc] = useState(card.description || '');
-  const [dueDate, setDueDate] = useState(card.dueDate || '');
 
   const updateCard = () => {
     const updatedLists = [...lists];
@@ -33,7 +38,6 @@ export default function Card({
       ...card,
       title: editTitle,
       description: editDesc,
-      dueDate,
     };
     updatedLists[listIndex].cards[cardIndex] = updatedCard;
     setLists(updatedLists);
@@ -51,53 +55,59 @@ export default function Card({
     <>
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
+        onLongPress={() => drag?.()}
         style={styles.card}
       >
         <Text>{card.title}</Text>
       </TouchableOpacity>
 
-      <Modal visible={modalVisible} animationType="slide">
+     {modalVisible && <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modal}>
-          <TextInput
-            value={editTitle}
-            onChangeText={setEditTitle}
-            placeholder="Title"
-            style={styles.input}
-          />
-          <TextInput
-            value={editDesc}
-            onChangeText={setEditDesc}
-            placeholder="Description"
-            style={styles.input}
-          />
-          <TextInput
-            value={dueDate}
-            onChangeText={setDueDate}
-            placeholder="Due Date (optional)"
-            style={styles.input}
-          />
           <View
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginBottom: 10,
+              backgroundColor: '#fff',
+              padding: 20,
+              borderRadius: 10,
+              width: '90%',
             }}
           >
-            <Button
-              title="Update"
-              onPress={updateCard}
-              style={{ flex: 1, marginEnd: 5 }}
+            <TextInput
+              value={editTitle}
+              onChangeText={setEditTitle}
+              placeholder="Title"
+              style={styles.input}
             />
-            <Button
-              title="Delete"
-              color="red"
-              onPress={deleteCard}
-              style={{ flex: 1, marginStart: 5 }}
+            <TextInput
+              value={editDesc}
+              onChangeText={setEditDesc}
+              placeholder="Description"
+              style={styles.input}
             />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: 10,
+              }}
+            >
+              <Button
+                title="Update"
+                onPress={updateCard}
+                style={{ flex: 1, marginEnd: 5 }}
+              />
+              <Button
+                title="Delete"
+                color="red"
+                onPress={deleteCard}
+                style={{ flex: 1, marginStart: 5 }}
+              />
+            </View>
+            <Button title="Close" onPress={() => {
+              setModalVisible(false)
+            }} />
           </View>
-          <Button title="Close" onPress={() => setModalVisible(false)} />
         </View>
-      </Modal>
+      </Modal>}
     </>
   );
 }
@@ -113,7 +123,9 @@ const styles = StyleSheet.create({
   modal: {
     padding: 20,
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#00000040',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   input: {
     borderBottomWidth: 1,
